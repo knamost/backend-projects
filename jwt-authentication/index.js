@@ -1,5 +1,8 @@
 import express from 'express';
+
 import userRouter from './routes/user.routes.js';
+import adminRouter from './routes/admin.routes.js'
+
 import { attachUser } from './middleware/auth.middleware.js';
 
 
@@ -11,8 +14,9 @@ const PORT = process.env.PORT ?? 8000
 //?     Middlewares
 app.use(express.json());
 app.use(attachUser); 
-app.use('/user', userRouter)
 
+app.use('/user', userRouter)
+app.use('/admin', adminRouter)
 
 //?     Routes
 app.get('/', (req, res) => {
