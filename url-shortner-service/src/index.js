@@ -1,6 +1,5 @@
 import express from 'express';
-import { json } from 'node:stream/consumers';
-
+import userRouter from './routes/user.routes.js'
 
 const app = express();
 const PORT = process.env.PORT ?? 8000;
@@ -8,7 +7,8 @@ const PORT = process.env.PORT ?? 8000;
 
 
 //?     Middlewares
-app.use(express.json())
+app.use(express.json());
+app.use('/user', userRouter)
 
 
 //?     Routes
