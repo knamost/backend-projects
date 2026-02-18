@@ -1,4 +1,4 @@
-import { z, string } from 'zod';
+import { z, string, email } from 'zod';
 
 
 export const signupPostRequestBodySchema = z.object({
@@ -8,4 +8,9 @@ export const signupPostRequestBodySchema = z.object({
     password: z.string().min(3),
 });
 
+
+export const loginPostRequestBodySchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(3),
+});
 
