@@ -1,6 +1,6 @@
 import express from 'express';
 import userRouter from './routes/user.routes.js'
-
+import { authenticateMiddleware } from './middlewares/auth.middleware.js'
 const app = express();
 const PORT = process.env.PORT ?? 8000;
 
@@ -8,6 +8,8 @@ const PORT = process.env.PORT ?? 8000;
 
 //?     Middlewares
 app.use(express.json());
+app.use(authenticateMiddleware);
+
 app.use('/user', userRouter)
 
 
