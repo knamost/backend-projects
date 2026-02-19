@@ -3,25 +3,20 @@ import { userTokenSchema } from '../validation/token.validation.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+/** Create a signed JWT from a validated payload. */
+export async function createToken(payload) {
+    const validationResult = await userTokenSchema.safeParseAsync(payload);
+    if (validationResult.error) throw new Error(validationResult.error);
 
-export async function createToken(payload){
-    const valildationResult = await userTokenSchema.safeParseAsync(payload);
-    if (valildationResult.error) throw new Error(valildationResult.error);
+    return jwt.sign(validationResult.data, JWT_SECRET);
+}
 
-    const payloadValidatedData = valildationResult.data
-
-    const token = jwt.sign(payloadValidatedData, JWT_SECRET);
-    return token;
-};
-
-
+/** Verify and decode a JWT. Returns the payload or null if invalid/expired. */
 export function validateUserToken(token) {
     try {
-        const payload = jwt.verify(token, JWT_SECRET)
-        return payload;
-    } catch (error) {
-        //? if token is invalid/expired
+        return jwt.verify(token, JWT_SECRET);
+    } catch {
         return null;
     }
-};
+}
 

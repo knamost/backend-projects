@@ -1,31 +1,33 @@
-
-
-/** to get req,res,next suggestion
- * 
- * @param {import("express").Request} req 
- * @param {import("express").Response} res 
- * @param {import("express").NextFunction} next 
- */
-
 import { validateUserToken } from "../utils/token.js";
 
-
-export function authenticateMiddleware(req, res, next) {
-    // Header Authorization : Bearer <TOKEN>
+/**
+ * Parses the Authorization header and attaches the decoded user to `req.user`.
+ * If no header is present, continues without attaching (guest user).
+ *
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ */
+export function authenticate(req, res, next) {
     const authHeader = req.headers['authorization'];
-    if(!authHeader) return next();   // not a logged in user
+    if (!authHeader) return next();
 
-    // checking 'Bearer' exists  or not in header
-    if(!authHeader.startsWith('Bearer')) return res.status(400).json({ error: `Authorization Headers must starts with 'Bearer'` });
+    if (!authHeader.startsWith('Bearer')) {
+        return res.status(400).json({ error: "Authorization header must start with 'Bearer'" });
+    }
 
-
-    const [_, token] = authHeader.split(' ');   // [Bearer, <TOKEN>]
-
-    // getting payload from jwt( paylod: user data)
+    const [, token] = authHeader.split(' ');
     const payload = validateUserToken(token);
 
-    // creating a new property user on request
     req.user = payload;
-
     next();
-};
+}
+
+/**
+ * Guard middleware — rejects the request if the user is not authenticated.
+ * Must be used after `authenticate`.
+ */
+export function requireAuth(req, res, next) {
+    if (!req.user?.id) return res.status(401).json({ error: 'Authentication required' });
+    next();
+}

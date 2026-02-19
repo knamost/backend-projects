@@ -1,44 +1,98 @@
-# Project requirement - URL Shortner API
+# URL Shortener Service
 
-## Tech Stack Overview
+A REST API that shortens URLs, built with Node.js, Express, PostgreSQL, and Drizzle ORM.
 
-|Category           |Technology         |Purpose                                   |
-|-----------        |-----------        |-----------                               |
-|Backend            |Node.js + Express  |REST API Development                      |
-|Database           | postgresql        |Reletional data store                     |
-|ORM                | Drizzle ORM       |type safe database queries and and schema |
-|containerization   | docker + compose  | local postgresql instance                |
-| Authentication    | jwt               | securing private routes                  |
-|testing tool       | postman           | Manual api testing                       |
+## Tech Stack
 
+| Category         | Technology        |
+| ---------------- | ----------------- |
+| Runtime          | Node.js           |
+| Framework        | Express 5         |
+| Database         | PostgreSQL        |
+| ORM              | Drizzle ORM       |
+| Auth             | JWT               |
+| Password Hashing | argon2            |
+| Validation       | Zod 4             |
+| Containers       | Docker Compose    |
 
-# Project requirement
-make sure you have following installed
-nodejs, docker, postman, code-editor (vs code)
+## Prerequisites
 
-# NPM Dependencies
+- Node.js (v20+)
+- pnpm
+- Docker & Docker Compose
+- Postman or similar (for testing)
+
+## Getting Started
+
 ```bash
-npm install express drizzle-orm pg jsonwebtoken bcrypt dotenv argon2
+# 1. Start PostgreSQL
+docker compose up -d
+
+# 2. Install dependencies
+pnpm install
+
+# 3. Create a .env file
+#    DATABASE_URL=postgres://postgres:admin@localhost:5432/postgres
+#    JWT_SECRET=your-secret-key
+#    PORT=8000
+
+# 4. Run database migrations
+pnpm drizzle-kit push
+
+# 5. Start the dev server (with --watch)
+pnpm dev
 ```
 
+## API Routes
 
-## Auth routes
+### Auth (`/user`)
 
-| Method    |   Endpoint    |   Description   | Auth Req  |
-|-----------|---------------|-----------------|------------|
-|post       |   `signup`      | Register a new user   |no     |
-|post       |   `login`       | Login and receive token|no     | 
+| Method | Endpoint        | Description               | Auth Required |
+| ------ | --------------- | ------------------------- | ------------- |
+| POST   | `/user/signup`  | Register a new user       | No            |
+| POST   | `/user/login`   | Login and receive a JWT   | No            |
 
+### URLs
 
-## URL routes
+| Method | Endpoint       | Description                              | Auth Required |
+| ------ | -------------- | ---------------------------------------- | ------------- |
+| POST   | `/shorten`     | Create a short URL                       | Yes           |
+| GET    | `/urls`        | List all URLs for the logged-in user     | Yes           |
+| GET    | `/:shortCode`  | Redirect to the original URL             | No            |
+| DELETE | `/:id`         | Delete a short URL (owner only)          | Yes           |
 
-| Method    |   Endpoint    |   Description                              | Auth Req  |
-|-----------|---------------|--------------------------------------------|-----------|
-|post   |    `/shorten`     |create a short url from long one            |  yes      |
-|get    |   `/:shortCode`   |redirect to original url                    |  no       |
-|get    |   `/urls`         |get all URLs created by the logged in user  |  yes      |
-|delete |  `/urls/:id`      |Delete a short url (if it belong to user)   |  yes      |
+## Project Structure
 
+```
+src/
+  index.js              # App entry point, middleware & route setup
+  db/index.js           # Drizzle database connection
+  middlewares/
+    auth.middleware.js   # JWT parsing (authenticate) & guard (requireAuth)
+  models/
+    user.model.js        # users table schema
+    url.model.js         # urls table schema
+    index.js             # barrel export
+  routes/
+    user.routes.js       # signup & login handlers
+    url.routes.js        # shorten, list, redirect, delete handlers
+  services/
+    user.service.js      # user DB queries (getUserByEmail, createUser)
+    url.service.js       # URL DB queries (createShortURL, getUrlByCode, etc.)
+  utils/
+    hash.js              # argon2 hash & verify
+    token.js             # JWT sign & verify
+  validation/
+    request.validation.js  # Zod schemas for request bodies
+    token.validation.js    # Zod schema for JWT payload
+```
 
+## Auth
 
-## 
+All protected routes require an `Authorization` header:
+
+```
+Authorization: Bearer <token>
+```
+
+Get a token by calling `POST /user/login`.

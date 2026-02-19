@@ -1,24 +1,22 @@
 import express from 'express';
-import userRouter from './routes/user.routes.js'
-import { authenticateMiddleware } from './middlewares/auth.middleware.js'
+import { authenticate } from './middlewares/auth.middleware.js';
+import userRouter from './routes/user.routes.js';
+import urlRouter from './routes/url.routes.js';
+
 const app = express();
 const PORT = process.env.PORT ?? 8000;
 
-
-
-//?     Middlewares
+// --- Middlewares ---
 app.use(express.json());
-app.use(authenticateMiddleware);
+app.use(authenticate); // parses JWT from Authorization header on every request
 
-app.use('/user', userRouter)
+// --- Routes ---
+app.use('/user', userRouter); // /user/signup, /user/login
+app.use(urlRouter);           // /shorten, /urls, /:shortCode, /:id
 
-
-//?     Routes
 app.get('/', (req, res) => {
-    return res.json({status: `Server is up and running....`});
+    return res.json({ status: 'Server is up and running' });
 });
 
-
-
-//?     server listening
+// --- Start ---
 app.listen(PORT, () => console.log(`Server is listening on port: ${PORT}`));

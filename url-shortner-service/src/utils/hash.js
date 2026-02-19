@@ -1,11 +1,11 @@
 import argon2 from 'argon2';
 
-
-export async function hashPassword(password){
-    const hashedPassword = await argon2.hash(password);
-    return hashedPassword;
+/** Hash a plaintext password using argon2. */
+export async function hashPassword(password) {
+    return argon2.hash(password);
 }
 
-export async function verifyPassword(hashedPassword, password){
-    return await argon2.verify(hashedPassword, password);
+/** Verify a plaintext password against an argon2 hash. */
+export async function verifyPassword(hashedPassword, password) {
+    return argon2.verify(hashedPassword, password);
 }
